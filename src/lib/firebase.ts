@@ -45,13 +45,15 @@ export const checkLobbyExists = async (lobbyCode: string): Promise<boolean> => {
 };
 
 // Connection status management
-export const setupPresence = (userId: string) => {
+import { ref, onValue, onDisconnect, set, serverTimestamp, Unsubscribe } from 'firebase/database';
+
+const setupPresence = (userId: string): Unsubscribe => {
   const userStatusRef = ref(database, `/status/${userId}`);
   const isOfflineForDatabase = {
     state: 'offline',
     last_changed: serverTimestamp(),
   };
-  
+
   const isOnlineForDatabase = {
     state: 'online',
     last_changed: serverTimestamp(),
@@ -59,15 +61,18 @@ export const setupPresence = (userId: string) => {
 
   // Set up presence system
   const connectedRef = ref(database, '.info/connected');
-  onValue(connectedRef, (snapshot) => {
+  const unsubscribe = onValue(connectedRef, (snapshot) => {
     if (snapshot.val() === false) {
       return;
     }
 
     // Set user as online
     set(userStatusRef, isOnlineForDatabase);
-    
+
     // Set user as offline when they disconnect
     onDisconnect(userStatusRef).set(isOfflineForDatabase);
   });
+
+  // Return unsubscribe function
+  return unsubscribe;
 };
