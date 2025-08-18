@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, type User } from 'firebase/auth';
-import { getDatabase, ref, onDisconnect, serverTimestamp, set, onValue } from 'firebase/database';
+import { getDatabase, ref, onDisconnect, serverTimestamp, set, onValue, get } from 'firebase/database';
 
 const firebaseConfig = {
   // Your config here
@@ -28,6 +28,19 @@ export const signInAnonymouslyWithRetry = async (): Promise<User> => {
     await new Promise(resolve => setTimeout(resolve, 1000));
     const retryResult = await signInAnonymously(auth);
     return retryResult.user;
+  }
+};
+
+// Lobby management
+export const checkLobbyExists = async (lobbyCode: string): Promise<boolean> => {
+  try {
+    const lobbyRef = ref(database, `/lobbies/${lobbyCode}`);
+    const snapshot = await get(lobbyRef);
+    return snapshot.exists();
+  } catch (error) {
+    console.error('Error checking lobby existence:', error);
+    // In case of error, assume it doesn't exist to allow retry
+    return false;
   }
 };
 
