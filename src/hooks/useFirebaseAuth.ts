@@ -1,12 +1,27 @@
-import { useState, useEffect } from 'react';
+// TypeScript
+import { useEffect, useRef, useState } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
-import { auth, signInAnonymouslyWithRetry, setupPresence } from '../lib/firebase';
+import type { Unsubscribe } from 'firebase/database';
+import type { FirebaseError } from 'firebase/app';
+
+import { auth, setupPresence, signInAnonymouslyWithRetry } from '../lib/firebase.ts';
 
 interface AuthState {
   user: User | null;
   loading: boolean;
   error: string | null;
 }
+
+// Normalize and extract a readable message from unknown errors
+const toErrorMessage = (err: unknown): string => {
+  if (typeof err === 'string') return err;
+  if (err && typeof err === 'object') {
+    const e = err as Partial<Error> & Partial<FirebaseError>;
+    const code = 'code' in e && typeof e.code === 'string' ? ` (${e.code})` : '';
+    if (e.message) return `${e.message}${code}`;
+  }
+  return 'Unexpected error occurred. Please try again.';
+};
 
 export const useFirebaseAuth = () => {
   const [authState, setAuthState] = useState<AuthState>({
@@ -15,72 +30,74 @@ export const useFirebaseAuth = () => {
     error: null,
   });
 
+  // Keep the latest presence unsubscribe accessible to both effect and retry
+  const presenceUnsubRef = useRef<Unsubscribe | null>(null);
+
+  const attachPresence = (uid: string) => {
+    // Clean up existing listener first
+    if (presenceUnsubRef.current) {
+      presenceUnsubRef.current();
+      presenceUnsubRef.current = null;
+    }
+    presenceUnsubRef.current = setupPresence(uid);
+  };
+
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(
+    const unsubscribeAuth = onAuthStateChanged(
       auth,
       async (user) => {
         if (user) {
-          // User is signed in
+          setAuthState({ user, loading: false, error: null });
+          attachPresence(user.uid);
+          return;
+        }
+
+        try {
+          setAuthState((prev) => ({ ...prev, loading: true, error: null }));
+          const anonymousUser = await signInAnonymouslyWithRetry();
+          setAuthState({ user: anonymousUser, loading: false, error: null });
+          attachPresence(anonymousUser.uid);
+        } catch (err: unknown) {
+          console.error('Anonymous sign-in failed:', err);
           setAuthState({
-            user,
+            user: null,
             loading: false,
-            error: null,
+            error: toErrorMessage(err),
           });
-          
-          // Set up presence tracking
-          setupPresence(user.uid);
-        } else {
-          // No user is signed in, attempt anonymous sign-in
-          try {
-            setAuthState(prev => ({ ...prev, loading: true, error: null }));
-            const anonymousUser = await signInAnonymouslyWithRetry();
-            setAuthState({
-              user: anonymousUser,
-              loading: false,
-              error: null,
-            });
-            
-            // Set up presence tracking
-            setupPresence(anonymousUser.uid);
-          } catch (error) {
-            console.error('Failed to sign in anonymously:', error);
-            setAuthState({
-              user: null,
-              loading: false,
-              error: 'Failed to authenticate. Please refresh the page.',
-            });
-          }
         }
       },
-      (error) => {
-        console.error('Auth state change error:', error);
+      (err: unknown) => {
+        console.error('Auth state change error:', err);
         setAuthState({
           user: null,
           loading: false,
-          error: 'Authentication error. Please refresh the page.',
+          error: toErrorMessage(err),
         });
       }
     );
 
-    return () => unsubscribe();
+    return () => {
+      // Clean up presence and auth listener on unmount
+      if (presenceUnsubRef.current) {
+        presenceUnsubRef.current();
+        presenceUnsubRef.current = null;
+      }
+      unsubscribeAuth();
+    };
   }, []);
 
   const retry = async () => {
     try {
-      setAuthState(prev => ({ ...prev, loading: true, error: null }));
+      setAuthState((prev) => ({ ...prev, loading: true, error: null }));
       const user = await signInAnonymouslyWithRetry();
-      setAuthState({
-        user,
-        loading: false,
-        error: null,
-      });
-      setupPresence(user.uid);
-    } catch (error) {
-      console.error('Retry authentication failed:', error);
-      setAuthState(prev => ({
+      setAuthState({ user, loading: false, error: null });
+      attachPresence(user.uid);
+    } catch (err: unknown) {
+      console.error('Retry authentication failed:', err);
+      setAuthState((prev) => ({
         ...prev,
         loading: false,
-        error: 'Failed to authenticate. Please refresh the page.',
+        error: toErrorMessage(err),
       }));
     }
   };

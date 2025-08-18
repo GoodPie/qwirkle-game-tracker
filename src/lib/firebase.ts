@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, type User } from 'firebase/auth';
-import { getDatabase, ref, onDisconnect, serverTimestamp, set, onValue, get } from 'firebase/database';
+import {getDatabase, ref, onDisconnect, serverTimestamp, set, onValue, get, type Unsubscribe} from 'firebase/database';
 
 const firebaseConfig = {
   // Your config here
@@ -44,11 +44,9 @@ export const checkLobbyExists = async (lobbyCode: string): Promise<boolean> => {
   }
 };
 
-// Connection status management
-import { ref, onValue, onDisconnect, set, serverTimestamp, Unsubscribe } from 'firebase/database';
-
-const setupPresence = (userId: string): Unsubscribe => {
+export const setupPresence = (userId: string): Unsubscribe => {
   const userStatusRef = ref(database, `/status/${userId}`);
+
   const isOfflineForDatabase = {
     state: 'offline',
     last_changed: serverTimestamp(),
@@ -59,20 +57,16 @@ const setupPresence = (userId: string): Unsubscribe => {
     last_changed: serverTimestamp(),
   };
 
-  // Set up presence system
   const connectedRef = ref(database, '.info/connected');
   const unsubscribe = onValue(connectedRef, (snapshot) => {
     if (snapshot.val() === false) {
       return;
     }
 
-    // Set user as online
+    // Mark online and register offline handler
     set(userStatusRef, isOnlineForDatabase);
-
-    // Set user as offline when they disconnect
     onDisconnect(userStatusRef).set(isOfflineForDatabase);
   });
 
-  // Return unsubscribe function
   return unsubscribe;
 };
