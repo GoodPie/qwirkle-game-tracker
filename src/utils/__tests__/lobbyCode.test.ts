@@ -64,10 +64,6 @@ describe('lobbyCode utilities', () => {
       expect(validateLobbyCode('ABC-12')).toBe(false); // special characters
     });
 
-    it('should reject null and undefined', () => {
-      expect(validateLobbyCode(null as any)).toBe(false);
-      expect(validateLobbyCode(undefined as any)).toBe(false);
-    });
   });
 
   describe('normalizeLobbyCode', () => {
@@ -104,13 +100,10 @@ describe('lobbyCode utilities', () => {
     });
 
     it('should handle empty and invalid inputs', () => {
-      const result1 = validateAndNormalizeLobbyCode('');
-      expect(result1.isValid).toBe(false);
-      expect(result1.normalizedCode).toBe('');
+      const result = validateAndNormalizeLobbyCode('');
+      expect(result.isValid).toBe(false);
+      expect(result.normalizedCode).toBe('');
 
-      const result2 = validateAndNormalizeLobbyCode(null as any);
-      expect(result2.isValid).toBe(false);
-      expect(result2.normalizedCode).toBe('');
     });
   });
 

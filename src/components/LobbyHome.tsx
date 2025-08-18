@@ -1,12 +1,11 @@
 import {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {Button} from './ui/button';
-import {Input} from './ui/input';
-import {useFirebaseAuth, useLobbyActions} from '../hooks';
-import {validateAndNormalizeLobbyCode} from '../utils/lobbyCode';
+import {Button} from '@ui/button';
+import {Input} from '@ui/input';
+import {useFirebaseAuth, useLobbyActions} from '@/hooks';
+import {validateAndNormalizeLobbyCode} from '@/utils/lobbyCode';
 import {Loader2} from 'lucide-react';
-import {LoadingLobby} from "./lobby/LoadingLobby.tsx";
-import LobbyError from "./lobby/LobbyError.tsx";
+import {LobbyLoading, LobbyError} from "@/components/lobby";
 
 export function LobbyHome() {
   const navigate = useNavigate();
@@ -103,7 +102,7 @@ export function LobbyHome() {
   // Show loading state while authenticating
   if (authLoading) {
     return (
-      <LoadingLobby/>
+      <LobbyLoading/>
     );
   }
 

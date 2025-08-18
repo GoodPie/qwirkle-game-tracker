@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { describe, it, expect, vi } from 'vitest';
-import LobbyRoom from '../LobbyRoom';
-import type { Lobby } from '../../types/lobby';
+import LobbyRoom from '@/components/LobbyRoom';
+import type { Lobby } from '@/types/lobby.ts';
 
 // Mock the hooks
 vi.mock('../../hooks/useFirebaseAuth', () => ({
@@ -73,7 +73,7 @@ describe('LobbyRoom Integration with PlayerList', () => {
     expect(screen.getByText('Test User (You)')).toBeInTheDocument();
     expect(screen.getByText('Other Player')).toBeInTheDocument();
   });
-  
+
   it('should show connection status for all players', () => {
     renderLobbyRoom();
 

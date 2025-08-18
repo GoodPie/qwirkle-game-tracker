@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { useLobby } from '../useLobby';
+import { useLobby } from '@/hooks/useLobby';
 
 describe('useLobby', () => {
   it('should be defined', () => {

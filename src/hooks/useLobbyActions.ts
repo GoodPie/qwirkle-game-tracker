@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { ref, set, update, remove, get } from 'firebase/database';
 import { database } from '../lib/firebase';
 import { generateUniqueLobbyCodeWithFirebase } from '../utils/lobbyCode';
-import type { Lobby, Player } from '../types/lobby';
+import type { Lobby, Player } from '@/types/lobby';
 
 interface CreateLobbyResult {
   success: boolean;

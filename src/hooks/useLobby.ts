@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ref, onValue, off, get } from 'firebase/database';
-import { database } from '../lib/firebase';
-import type { Lobby } from '../types/lobby';
+import { database } from '@/lib/firebase';
+import type { Lobby } from '@/types/lobby';
+import {DataSnapshot} from "@firebase/database";
 
 interface UseLobbyState {
   lobby: Lobby | null;
@@ -41,7 +42,7 @@ export const useLobby = (lobbyCode: string | null): UseLobbyReturn => {
       setState(prev => ({ ...prev, loading: true, error: null }));
       
       const lobbyRef = ref(database, `/lobbies/${lobbyCode}`);
-      const snapshot = await get(lobbyRef);
+      const snapshot: DataSnapshot = await get(lobbyRef);
       
       if (snapshot.exists()) {
         const lobbyData = snapshot.val() as Lobby;
@@ -81,7 +82,7 @@ export const useLobby = (lobbyCode: string | null): UseLobbyReturn => {
 
     const lobbyRef = ref(database, `/lobbies/${lobbyCode}`);
 
-    const handleValue = (snapshot: any) => {
+    const handleValue = (snapshot: DataSnapshot) => {
       try {
         if (snapshot.exists()) {
           const lobbyData = snapshot.val() as Lobby;
@@ -107,7 +108,7 @@ export const useLobby = (lobbyCode: string | null): UseLobbyReturn => {
       }
     };
 
-    const handleError = (error: any) => {
+    const handleError = (error: Error) => {
       console.error('Firebase listener error:', error);
       setState({
         lobby: null,

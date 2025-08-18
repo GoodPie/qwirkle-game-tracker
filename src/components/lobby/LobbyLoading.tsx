@@ -1,6 +1,6 @@
 import {Loader2} from "lucide-react";
 
-export function LoadingLobby() {
+export function LobbyLoading() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="flex flex-col items-center space-y-4">

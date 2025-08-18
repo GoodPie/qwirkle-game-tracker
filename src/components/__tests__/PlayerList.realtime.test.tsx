@@ -1,8 +1,8 @@
 import {render, screen, act} from '@testing-library/react';
 import {describe, it, expect, vi, beforeEach, afterEach} from 'vitest';
 import PlayerList from '../PlayerList';
-import type {Lobby, Player} from '../../types/lobby';
-import type {MockIconProps} from "../../test/types.ts";
+import type {Lobby, Player} from '@/types/lobby.ts';
+import type {MockIconProps} from "@/test/types.ts";
 
 // Mock Lucide React icons
 vi.mock('lucide-react', () => ({

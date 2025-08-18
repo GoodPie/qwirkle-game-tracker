@@ -1,4 +1,4 @@
-import {Button} from "../ui/button.tsx";
+import {Button} from "@ui/button.tsx";
 
 
 interface LobbyErrorProps {
@@ -7,7 +7,7 @@ interface LobbyErrorProps {
   onRetry: () => void;
 }
 
-export default function LobbyError({title, message, onRetry}: Readonly<LobbyErrorProps>) {
+export function LobbyError({title, message, onRetry}: Readonly<LobbyErrorProps>) {
   return (
     <div className="max-w-md w-full space-y-6 text-center">
       <div className="space-y-2">

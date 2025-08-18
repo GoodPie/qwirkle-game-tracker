@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { ref, onValue } from 'firebase/database';
-import { database } from '../lib/firebase';
+import {useState, useEffect} from 'react';
+import {ref, onValue} from 'firebase/database';
+import {database} from '@/lib/firebase';
 
 interface UserPresence {
   state: 'online' | 'offline';
@@ -20,13 +20,13 @@ export const usePresence = (userIds: string[]) => {
 
     userIds.forEach(userId => {
       const userStatusRef = ref(database, `/status/${userId}`);
-      
+
       const unsubscribe = onValue(userStatusRef, (snapshot) => {
         const presence = snapshot.val() as UserPresence | null;
-        
+
         setPresenceData(prev => ({
           ...prev,
-          [userId]: presence || { state: 'offline', last_changed: Date.now() }
+          [userId]: presence || {state: 'offline', last_changed: Date.now()}
         }));
       });
 
@@ -45,7 +45,7 @@ export const usePresence = (userIds: string[]) => {
   const getUserLastSeen = (userId: string): Date | null => {
     const presence = presenceData[userId];
     if (!presence) return null;
-    
+
     return new Date(presence.last_changed);
   };
 

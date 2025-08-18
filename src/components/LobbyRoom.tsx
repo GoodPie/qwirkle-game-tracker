@@ -1,16 +1,16 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Button } from './ui/button';
-import { useFirebaseAuth, useLobby, useLobbyActions } from '../hooks';
-import PlayerList from './PlayerList';
-import { Loader2, ArrowLeft, Copy, Check } from 'lucide-react';
+import {useState, useEffect} from 'react';
+import {useParams, useNavigate} from 'react-router-dom';
+import {Button} from '@ui/button';
+import {useFirebaseAuth, useLobby, useLobbyActions} from '@/hooks';
+import PlayerList from '@/components/PlayerList';
+import {Loader2, ArrowLeft, Copy, Check} from 'lucide-react';
 
 export default function LobbyRoom() {
-  const { code } = useParams<{ code: string }>();
+  const {code} = useParams<{ code: string }>();
   const navigate = useNavigate();
-  const { user, loading: authLoading } = useFirebaseAuth();
-  const { lobby, loading: lobbyLoading, error: lobbyError } = useLobby(code || null);
-  const { leaveLobby } = useLobbyActions();
+  const {user, loading: authLoading} = useFirebaseAuth();
+  const {lobby, loading: lobbyLoading, error: lobbyError} = useLobby(code || null);
+  const {leaveLobby} = useLobbyActions();
 
   const [isLeaving, setIsLeaving] = useState(false);
   const [showLeaveConfirmation, setShowLeaveConfirmation] = useState(false);
@@ -21,7 +21,7 @@ export default function LobbyRoom() {
   useEffect(() => {
     if (user && lobby && !lobby.players[user.uid] && !lobbyLoading) {
       // User is not in the lobby, redirect to home
-      navigate('/', { replace: true });
+      navigate('/', {replace: true});
     }
   }, [user, lobby, lobbyLoading, navigate]);
 
@@ -48,7 +48,7 @@ export default function LobbyRoom() {
 
       if (result.success) {
         // Navigate back to home
-        navigate('/', { replace: true });
+        navigate('/', {replace: true});
       } else {
         setError(result.error || 'Failed to leave lobby. Please try again.');
       }
@@ -62,7 +62,7 @@ export default function LobbyRoom() {
   };
 
   const handleBackToHome = () => {
-    navigate('/', { replace: true });
+    navigate('/', {replace: true});
   };
 
   const isUserLobbyLeader = user && lobby && lobby.leaderId === user.uid;
@@ -72,7 +72,7 @@ export default function LobbyRoom() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center space-y-4">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary"/>
           <p className="text-muted-foreground">Loading lobby...</p>
         </div>
       </div>
@@ -91,7 +91,7 @@ export default function LobbyRoom() {
             </p>
           </div>
           <Button onClick={handleBackToHome} className="w-full">
-            <ArrowLeft className="mr-2 h-4 w-4" />
+            <ArrowLeft className="mr-2 h-4 w-4"/>
             Back to Home
           </Button>
         </div>
@@ -128,7 +128,7 @@ export default function LobbyRoom() {
             >
               {isLeaving ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin"/>
                   Leaving...
                 </>
               ) : (
@@ -151,7 +151,7 @@ export default function LobbyRoom() {
             onClick={handleBackToHome}
             className="h-10 px-3"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowLeft className="h-4 w-4 mr-2"/>
             Back
           </Button>
         </div>
@@ -173,9 +173,9 @@ export default function LobbyRoom() {
                 aria-label="Copy lobby code"
               >
                 {codeCopied ? (
-                  <Check className="h-4 w-4 text-green-600" />
+                  <Check className="h-4 w-4 text-green-600"/>
                 ) : (
-                  <Copy className="h-4 w-4" />
+                  <Copy className="h-4 w-4"/>
                 )}
               </Button>
             </div>
@@ -186,8 +186,8 @@ export default function LobbyRoom() {
         </div>
 
         {/* Players List */}
-        <PlayerList 
-          lobby={lobby} 
+        <PlayerList
+          lobby={lobby}
           currentUserId={user?.uid}
         />
 

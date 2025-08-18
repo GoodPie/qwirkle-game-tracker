@@ -1,8 +1,8 @@
 import {render, screen} from '@testing-library/react';
 import {describe, it, expect, vi, beforeEach} from 'vitest';
-import PlayerList from '../PlayerList';
-import type {Lobby, Player} from '../../types/lobby';
-import type {MockIconProps} from "../../test/types.ts";
+import type {MockIconProps} from "@/test/types";
+import type {Lobby, Player} from "@/types/lobby";
+import PlayerList from "@/components/PlayerList";
 
 // Mock Lucide React icons
 

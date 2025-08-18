@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Crown, Users, Wifi, WifiOff } from 'lucide-react';
-import type { Player, Lobby } from '../types/lobby';
+import type { Player, Lobby } from '@/types/lobby';
 
 interface PlayerListProps {
   lobby: Lobby;

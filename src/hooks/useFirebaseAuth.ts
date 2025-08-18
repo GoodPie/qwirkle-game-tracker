@@ -1,4 +1,3 @@
-// TypeScript
 import { useEffect, useRef, useState } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import type { Unsubscribe } from 'firebase/database';

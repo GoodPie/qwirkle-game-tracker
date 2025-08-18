@@ -71,7 +71,7 @@ export async function generateUniqueLobbyCode(
  * @returns true if code is valid 6-character alphanumeric format
  */
 export function validateLobbyCode(code: string): boolean {
-  if (!code || typeof code !== 'string') {
+  if (!code) {
     return false;
   }
   
@@ -86,7 +86,7 @@ export function validateLobbyCode(code: string): boolean {
  * @returns object with isValid boolean and normalized code
  */
 export function validateAndNormalizeLobbyCode(code: string): { isValid: boolean; normalizedCode: string } {
-  if (!code || typeof code !== 'string') {
+  if (!code) {
     return { isValid: false, normalizedCode: '' };
   }
   
