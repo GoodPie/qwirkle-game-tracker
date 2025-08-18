@@ -1,4 +1,5 @@
 /// <reference types="vitest" />
+/// <reference types="@vitest/browser/context" />
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import tailwindcss from '@tailwindcss/vite'

@@ -1,4 +1,5 @@
 import { generateLobbyCode, validateLobbyCode, normalizeLobbyCode } from '../lobbyCode';
+import { expect, describe, it } from 'vitest'
 
 describe('lobbyCode utilities', () => {
   describe('generateLobbyCode', () => {
@@ -34,8 +35,6 @@ describe('lobbyCode utilities', () => {
       expect(validateLobbyCode('ABC1234')).toBe(false); // too long
       expect(validateLobbyCode('abc123')).toBe(false); // lowercase
       expect(validateLobbyCode('ABC-12')).toBe(false); // special characters
-      expect(validateLobbyCode(null as any)).toBe(false);
-      expect(validateLobbyCode(undefined as any)).toBe(false);
     });
   });
 

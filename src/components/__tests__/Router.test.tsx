@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import LobbyHome from '../LobbyHome';
 import LobbyRoom from '../LobbyRoom';
+import { expect, describe, it } from 'vitest';
 
 describe('Router Integration', () => {
   it('should render LobbyHome at root path', () => {
