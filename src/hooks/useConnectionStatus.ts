@@ -37,7 +37,7 @@ export const useConnectionStatus = () => {
       }
     });
 
-    return () => unsubscribe();
+    return unsubscribe;
   }, []);
 
   return status;
