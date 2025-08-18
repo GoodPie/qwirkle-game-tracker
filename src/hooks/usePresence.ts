@@ -30,7 +30,7 @@ export const usePresence = (userIds: string[]) => {
         }));
       });
 
-      listeners.push(() => off(userStatusRef, 'value', unsubscribe));
+      listeners.push(unsubscribe);
     });
 
     return () => {
