@@ -1,9 +1,11 @@
+const MAX_REGENERATION_ATTEMPTS = 100;
+
 /**
  * Generates a secure 6-character alphanumeric lobby code
  * Excludes confusing characters (0/O, 1/I/L) for better UX
  * Uses crypto.getRandomValues() for cryptographically secure randomness
  */
-export function generateLobbyCode(): string {
+export function generateLobbyCode(attempts = 0): string {
   // Characters excluding confusing ones: 0, O, 1, I, L
   const chars = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
   const codeLength = 6;
@@ -25,8 +27,12 @@ export function generateLobbyCode(): string {
   
   // Additional validation: ensure code doesn't contain excluded characters
   if (/[01ILO]/.test(code)) {
+    if (attempts >= MAX_REGENERATION_ATTEMPTS) {
+      throw new Error('Failed to generate a unique lobby code after multiple attempts');
+    }
+
     // This should never happen with our character set, but safety check
-    return generateLobbyCode(); // Recursive retry
+    return generateLobbyCode(attempts++); // Recursive retry until retry
   }
   
   return code;
