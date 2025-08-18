@@ -1,36 +1,279 @@
-import { useParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Button } from './ui/button';
+import { useFirebaseAuth } from '../hooks/useFirebaseAuth';
+import { useLobby } from '../hooks/useLobby';
+import { useLobbyActions } from '../hooks/useLobbyActions';
+import { Loader2, Crown, Users, ArrowLeft, Copy, Check } from 'lucide-react';
+import type { Player } from '../types/lobby';
 
 export default function LobbyRoom() {
   const { code } = useParams<{ code: string }>();
+  const navigate = useNavigate();
+  const { user, loading: authLoading } = useFirebaseAuth();
+  const { lobby, loading: lobbyLoading, error: lobbyError } = useLobby(code || null);
+  const { leaveLobby } = useLobbyActions();
+
+  const [isLeaving, setIsLeaving] = useState(false);
+  const [showLeaveConfirmation, setShowLeaveConfirmation] = useState(false);
+  const [error, setError] = useState('');
+  const [codeCopied, setCodeCopied] = useState(false);
+
+  // Auto-join lobby if user is authenticated and lobby exists but user is not in it
+  useEffect(() => {
+    if (user && lobby && !lobby.players[user.uid] && !lobbyLoading) {
+      // User is not in the lobby, redirect to home
+      navigate('/', { replace: true });
+    }
+  }, [user, lobby, lobbyLoading, navigate]);
+
+  const handleCopyCode = async () => {
+    if (!code) return;
+
+    try {
+      await navigator.clipboard.writeText(code);
+      setCodeCopied(true);
+      setTimeout(() => setCodeCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy code:', err);
+    }
+  };
+
+  const handleLeaveLobby = async () => {
+    if (!user || !code) return;
+
+    setIsLeaving(true);
+    setError('');
+
+    try {
+      const result = await leaveLobby(code, user.uid);
+
+      if (result.success) {
+        // Navigate back to home
+        navigate('/', { replace: true });
+      } else {
+        setError(result.error || 'Failed to leave lobby. Please try again.');
+      }
+    } catch (err) {
+      console.error('Error leaving lobby:', err);
+      setError('Failed to leave lobby. Please try again.');
+    } finally {
+      setIsLeaving(false);
+      setShowLeaveConfirmation(false);
+    }
+  };
+
+  const handleBackToHome = () => {
+    navigate('/', { replace: true });
+  };
+
+  const isUserLobbyLeader = user && lobby && lobby.leaderId === user.uid;
+
+  // Show loading state while authenticating or loading lobby
+  if (authLoading || lobbyLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">Loading lobby...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if lobby not found or other errors
+  if (lobbyError || !lobby) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-6">
+        <div className="max-w-md w-full space-y-6 text-center">
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold text-foreground">Lobby Not Found</h1>
+            <p className="text-muted-foreground">
+              {lobbyError || 'The lobby you\'re looking for doesn\'t exist or has been deleted.'}
+            </p>
+          </div>
+          <Button onClick={handleBackToHome} className="w-full">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Home
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show confirmation dialog
+  if (showLeaveConfirmation) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-6">
+        <div className="max-w-md w-full space-y-6 text-center">
+          <div className="space-y-2">
+            <h2 className="text-xl font-bold text-foreground">Leave Lobby?</h2>
+            <p className="text-muted-foreground">
+              Are you sure you want to leave this lobby?
+              {isUserLobbyLeader && ' As the lobby leader, leadership will be transferred to another player.'}
+            </p>
+          </div>
+          <div className="flex space-x-3">
+            <Button
+              variant="outline"
+              onClick={() => setShowLeaveConfirmation(false)}
+              className="flex-1 h-12"
+              disabled={isLeaving}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleLeaveLobby}
+              className="flex-1 h-12"
+              disabled={isLeaving}
+            >
+              {isLeaving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Leaving...
+                </>
+              ) : (
+                'Leave Lobby'
+              )}
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const playersList = Object.values(lobby.players).sort((a, b) => a.joinedAt - b.joinedAt);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-2xl mx-auto">
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="text-center mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">Game Lobby</h1>
-            <div className="mt-2">
-              <span className="text-sm text-gray-600">Lobby Code:</span>
-              <div className="text-3xl font-mono font-bold text-blue-600 mt-1">
+    <div className="min-h-screen bg-background p-4">
+      <div className="max-w-2xl mx-auto space-y-6">
+        {/* Header with Back Button */}
+        <div className="flex items-center justify-between">
+          <Button
+            variant="ghost"
+            onClick={handleBackToHome}
+            className="h-10 px-3"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+        </div>
+
+        {/* Lobby Code Display */}
+        <div className="bg-card rounded-lg border p-6 text-center space-y-4">
+          <h1 className="text-2xl font-bold text-foreground">Game Lobby</h1>
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">Lobby Code</p>
+            <div className="flex items-center justify-center space-x-2">
+              <div className="text-4xl font-mono font-bold text-primary tracking-wider">
                 {code}
               </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleCopyCode}
+                className="h-10 w-10"
+                aria-label="Copy lobby code"
+              >
+                {codeCopied ? (
+                  <Check className="h-4 w-4 text-green-600" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )}
+              </Button>
             </div>
+            <p className="text-xs text-muted-foreground">
+              Share this code with other players to join
+            </p>
           </div>
-          
-          <div className="space-y-4">
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">Players</h2>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <p className="text-gray-600">Loading players...</p>
-              </div>
-            </div>
-            
-            <div className="flex space-x-3">
-              <button className="flex-1 py-2 px-4 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
-                Leave Lobby
-              </button>
-            </div>
+        </div>
+
+        {/* Players List */}
+        <div className="bg-card rounded-lg border p-6 space-y-4">
+          <div className="flex items-center space-x-2">
+            <Users className="h-5 w-5 text-muted-foreground" />
+            <h2 className="text-lg font-semibold text-foreground">
+              Players ({playersList.length})
+            </h2>
           </div>
+
+          <div className="space-y-3">
+            {playersList.map((player: Player) => {
+              const isLeader = player.id === lobby.leaderId;
+              const isCurrentUser = player.id === user?.uid;
+
+              return (
+                <div
+                  key={player.id}
+                  className={`flex items-center justify-between p-4 rounded-lg border transition-colors ${isCurrentUser
+                    ? 'bg-primary/5 border-primary/20'
+                    : 'bg-muted/30'
+                    }`}
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-3 h-3 rounded-full ${player.isConnected ? 'bg-green-500' : 'bg-gray-400'
+                      }`} />
+                    <div>
+                      <div className="flex items-center space-x-2">
+                        <span className="font-medium text-foreground">
+                          {player.name}
+                          {isCurrentUser && ' (You)'}
+                        </span>
+                        {isLeader && (
+                          <Crown className="h-4 w-4 text-yellow-500" aria-label="Lobby Leader" />
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {player.isConnected ? 'Connected' : 'Disconnected'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Game Status */}
+        <div className="bg-card rounded-lg border p-6 text-center">
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">Game Status</p>
+            <p className="text-lg font-medium text-foreground capitalize">
+              {lobby.gameState === 'waiting' && 'Waiting for players'}
+              {lobby.gameState === 'playing' && 'Game in progress'}
+              {lobby.gameState === 'finished' && 'Game finished'}
+            </p>
+          </div>
+
+          {isUserLobbyLeader && lobby.gameState === 'waiting' && (
+            <div className="mt-4 space-y-2">
+              <p className="text-sm text-muted-foreground">
+                You are the lobby leader
+              </p>
+              <Button className="w-full h-12" disabled>
+                Start Game (Coming Soon)
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {/* Leave Lobby Button */}
+        <div className="space-y-3">
+          <Button
+            variant="destructive"
+            onClick={() => setShowLeaveConfirmation(true)}
+            className="w-full h-12 text-base font-medium"
+            disabled={isLeaving}
+          >
+            Leave Lobby
+          </Button>
+
+          {error && (
+            <div className="p-4 rounded-md bg-destructive/10 border border-destructive/20">
+              <p className="text-sm text-destructive text-center">{error}</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
