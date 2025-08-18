@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
-import { useFirebaseAuth } from '../hooks/useFirebaseAuth';
-import { useLobby } from '../hooks/useLobby';
-import { useLobbyActions } from '../hooks/useLobbyActions';
+import { useFirebaseAuth, useLobby, useLobbyActions } from '../hooks';
 import PlayerList from './PlayerList';
 import { Loader2, ArrowLeft, Copy, Check } from 'lucide-react';
 

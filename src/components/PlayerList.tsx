@@ -12,7 +12,7 @@ interface PlayerListProps {
  * PlayerList component that displays all connected players with real-time updates
  * Shows lobby leader indicator, current turn highlight, and connection status
  */
-export default function PlayerList({ lobby, currentUserId, className = '' }: PlayerListProps) {
+export default function PlayerList({ lobby, currentUserId, className = '' }: Readonly<PlayerListProps>) {
   const [lastUpdateTime, setLastUpdateTime] = useState<number>(Date.now());
 
   // Track when the component receives updates to ensure sub-1-second updates

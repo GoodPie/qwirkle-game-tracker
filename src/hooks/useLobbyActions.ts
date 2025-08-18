@@ -113,7 +113,7 @@ export const useLobbyActions = (): UseLobbyActionsReturn => {
       const lobbyData = snapshot.val() as Lobby;
       
       // Check if user is already in the lobby
-      if (lobbyData.players && lobbyData.players[userId]) {
+      if (lobbyData?.players[userId]) {
         // User is already in lobby, just update connection status
         const playerRef = ref(database, `/lobbies/${lobbyCode}/players/${userId}`);
         await update(playerRef, {
@@ -179,7 +179,7 @@ export const useLobbyActions = (): UseLobbyActionsReturn => {
       const lobbyData = snapshot.val() as Lobby;
       
       // Check if user is in the lobby
-      if (!lobbyData.players || !lobbyData.players[userId]) {
+      if (!lobbyData?.players[userId]) {
         return {
           success: false,
           error: 'User is not in this lobby',

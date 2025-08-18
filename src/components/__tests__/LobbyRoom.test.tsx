@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
 
+import LobbyRoom from "../LobbyRoom";
+
 describe('LobbyRoom Component', () => {
   it('should be defined', () => {
     // Basic test to ensure the component can be imported
@@ -7,7 +9,6 @@ describe('LobbyRoom Component', () => {
   });
 
   it('should export LobbyRoom component', () => {
-    const LobbyRoom = require('../LobbyRoom').default;
     expect(LobbyRoom).toBeDefined();
     expect(typeof LobbyRoom).toBe('function');
   });

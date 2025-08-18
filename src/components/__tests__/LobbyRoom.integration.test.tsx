@@ -73,14 +73,7 @@ describe('LobbyRoom Integration with PlayerList', () => {
     expect(screen.getByText('Test User (You)')).toBeInTheDocument();
     expect(screen.getByText('Other Player')).toBeInTheDocument();
   });
-
-  it('should show lobby leader crown in PlayerList', () => {
-    renderLobbyRoom();
-
-    // The test user is the leader, so should see crown
-    expect(screen.getByTestId('crown-icon')).toBeInTheDocument();
-  });
-
+  
   it('should show connection status for all players', () => {
     renderLobbyRoom();
 

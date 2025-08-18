@@ -1,17 +1,18 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { useFirebaseAuth } from '../hooks/useFirebaseAuth';
-import { useLobbyActions } from '../hooks/useLobbyActions';
-import { validateAndNormalizeLobbyCode } from '../utils/lobbyCode';
-import { Loader2 } from 'lucide-react';
+import {useState} from 'react';
+import {useNavigate} from 'react-router-dom';
+import {Button} from './ui/button';
+import {Input} from './ui/input';
+import {useFirebaseAuth, useLobbyActions} from '../hooks';
+import {validateAndNormalizeLobbyCode} from '../utils/lobbyCode';
+import {Loader2} from 'lucide-react';
+import {LoadingLobby} from "./lobby/LoadingLobby.tsx";
+import LobbyError from "./lobby/LobbyError.tsx";
 
-export default function LobbyHome() {
+export function LobbyHome() {
   const navigate = useNavigate();
-  const { user, loading: authLoading, error: authError, retry } = useFirebaseAuth();
-  const { createLobby, joinLobby } = useLobbyActions();
-  
+  const {user, loading: authLoading, error: authError, retry} = useFirebaseAuth();
+  const {createLobby, joinLobby} = useLobbyActions();
+
   const [lobbyCode, setLobbyCode] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
@@ -29,7 +30,7 @@ export default function LobbyHome() {
 
     try {
       const result = await createLobby(user.uid);
-      
+
       if (result.success && result.lobbyCode) {
         // Navigate to the created lobby
         navigate(`/lobby/${result.lobbyCode}`);
@@ -51,8 +52,8 @@ export default function LobbyHome() {
     }
 
     // Validate lobby code
-    const { isValid, normalizedCode } = validateAndNormalizeLobbyCode(lobbyCode);
-    
+    const {isValid, normalizedCode} = validateAndNormalizeLobbyCode(lobbyCode);
+
     if (!isValid) {
       setLobbyCodeError('Please enter a valid 6-character lobby code');
       return;
@@ -64,7 +65,7 @@ export default function LobbyHome() {
 
     try {
       const result = await joinLobby(normalizedCode, user.uid);
-      
+
       if (result.success) {
         // Navigate to the joined lobby
         navigate(`/lobby/${normalizedCode}`);
@@ -86,7 +87,7 @@ export default function LobbyHome() {
   const handleLobbyCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toUpperCase();
     setLobbyCode(value);
-    
+
     // Clear error when user starts typing
     if (lobbyCodeError) {
       setLobbyCodeError('');
@@ -102,29 +103,14 @@ export default function LobbyHome() {
   // Show loading state while authenticating
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center space-y-4">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-muted-foreground">Connecting...</p>
-        </div>
-      </div>
+      <LoadingLobby/>
     );
   }
 
   // Show authentication error
   if (authError) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-6">
-        <div className="max-w-md w-full space-y-6 text-center">
-          <div className="space-y-2">
-            <h1 className="text-2xl font-bold text-foreground">Connection Error</h1>
-            <p className="text-muted-foreground">{authError}</p>
-          </div>
-          <Button onClick={retry} className="w-full">
-            Try Again
-          </Button>
-        </div>
-      </div>
+      <LobbyError title={"Connection Error"} message={authError} onRetry={retry}/>
     );
   }
 
@@ -135,10 +121,10 @@ export default function LobbyHome() {
           <h1 className="text-3xl font-bold text-foreground">Qwirkle Score Tracker</h1>
           <p className="text-muted-foreground">Create or join a game lobby</p>
         </div>
-        
+
         <div className="space-y-6">
           {/* Create Game Button */}
-          <Button 
+          <Button
             onClick={handleCreateGame}
             disabled={isCreating || !user}
             className="w-full h-12 text-base font-medium"
@@ -146,14 +132,14 @@ export default function LobbyHome() {
           >
             {isCreating ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="mr-2 h-4 w-4 animate-spin"/>
                 Creating Game...
               </>
             ) : (
               'Create Game'
             )}
           </Button>
-          
+
           {/* Join Game Section */}
           <div className="space-y-3">
             <div className="space-y-2">
@@ -162,7 +148,7 @@ export default function LobbyHome() {
                 placeholder="Enter lobby code"
                 value={lobbyCode}
                 onChange={handleLobbyCodeChange}
-                onKeyPress={handleKeyPress}
+                onKeyDown={handleKeyPress}
                 maxLength={6}
                 className={`h-12 text-base text-center font-mono tracking-wider ${
                   lobbyCodeError ? 'border-destructive focus-visible:ring-destructive' : ''
@@ -173,8 +159,8 @@ export default function LobbyHome() {
                 <p className="text-sm text-destructive text-center">{lobbyCodeError}</p>
               )}
             </div>
-            
-            <Button 
+
+            <Button
               onClick={handleJoinGame}
               disabled={!lobbyCode.trim() || isJoining || !user}
               variant="secondary"
@@ -183,7 +169,7 @@ export default function LobbyHome() {
             >
               {isJoining ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin"/>
                   Joining Game...
                 </>
               ) : (
