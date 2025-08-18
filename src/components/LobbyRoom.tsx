@@ -4,8 +4,8 @@ import { Button } from './ui/button';
 import { useFirebaseAuth } from '../hooks/useFirebaseAuth';
 import { useLobby } from '../hooks/useLobby';
 import { useLobbyActions } from '../hooks/useLobbyActions';
-import { Loader2, Crown, Users, ArrowLeft, Copy, Check } from 'lucide-react';
-import type { Player } from '../types/lobby';
+import PlayerList from './PlayerList';
+import { Loader2, ArrowLeft, Copy, Check } from 'lucide-react';
 
 export default function LobbyRoom() {
   const { code } = useParams<{ code: string }>();
@@ -143,8 +143,6 @@ export default function LobbyRoom() {
     );
   }
 
-  const playersList = Object.values(lobby.players).sort((a, b) => a.joinedAt - b.joinedAt);
-
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-2xl mx-auto space-y-6">
@@ -190,50 +188,10 @@ export default function LobbyRoom() {
         </div>
 
         {/* Players List */}
-        <div className="bg-card rounded-lg border p-6 space-y-4">
-          <div className="flex items-center space-x-2">
-            <Users className="h-5 w-5 text-muted-foreground" />
-            <h2 className="text-lg font-semibold text-foreground">
-              Players ({playersList.length})
-            </h2>
-          </div>
-
-          <div className="space-y-3">
-            {playersList.map((player: Player) => {
-              const isLeader = player.id === lobby.leaderId;
-              const isCurrentUser = player.id === user?.uid;
-
-              return (
-                <div
-                  key={player.id}
-                  className={`flex items-center justify-between p-4 rounded-lg border transition-colors ${isCurrentUser
-                    ? 'bg-primary/5 border-primary/20'
-                    : 'bg-muted/30'
-                    }`}
-                >
-                  <div className="flex items-center space-x-3">
-                    <div className={`w-3 h-3 rounded-full ${player.isConnected ? 'bg-green-500' : 'bg-gray-400'
-                      }`} />
-                    <div>
-                      <div className="flex items-center space-x-2">
-                        <span className="font-medium text-foreground">
-                          {player.name}
-                          {isCurrentUser && ' (You)'}
-                        </span>
-                        {isLeader && (
-                          <Crown className="h-4 w-4 text-yellow-500" aria-label="Lobby Leader" />
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {player.isConnected ? 'Connected' : 'Disconnected'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        <PlayerList 
+          lobby={lobby} 
+          currentUserId={user?.uid}
+        />
 
         {/* Game Status */}
         <div className="bg-card rounded-lg border p-6 text-center">
