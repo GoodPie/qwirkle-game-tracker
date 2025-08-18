@@ -17,9 +17,31 @@ vi.mock('firebase/database', () => ({
   ref: vi.fn(),
   onValue: vi.fn(),
   off: vi.fn(),
+  get: vi.fn(),
+  set: vi.fn(),
+  update: vi.fn(),
+  remove: vi.fn(),
+  push: vi.fn(),
   onDisconnect: vi.fn(() => ({
     set: vi.fn(),
   })),
   serverTimestamp: vi.fn(() => ({ '.sv': 'timestamp' })),
-  set: vi.fn(),
+}));
+
+// Mock custom hooks
+vi.mock('../hooks/useFirebaseAuth', () => ({
+  useFirebaseAuth: vi.fn(() => ({
+    user: { uid: 'test-user-id' },
+    loading: false,
+    error: null,
+    retry: vi.fn(),
+  })),
+}));
+
+vi.mock('../hooks/useLobbyActions', () => ({
+  useLobbyActions: vi.fn(() => ({
+    createLobby: vi.fn(),
+    joinLobby: vi.fn(),
+    leaveLobby: vi.fn(),
+  })),
 }));

@@ -1,6 +1,38 @@
 {
   "rules": {
-    ".read": "now < 1754323200000",  // 2025-8-5
-    ".write": "now < 1754323200000",  // 2025-8-5
+    "lobbies": {
+      "$lobbyCode": {
+        ".read": "auth != null",
+        ".write": "auth != null && (!data.exists())",
+        "players": {
+          "$playerId": {
+            ".write": "auth != null && ($playerId == auth.uid || root.child('lobbies').child($lobbyCode).child('leaderId').val() == auth.uid)"
+          }
+        },
+        "scores": {
+          "$playerId": {
+            ".write": "auth != null && root.child('lobbies').child($lobbyCode).child('leaderId').val() == auth.uid"
+          }
+        },
+        "gameState": {
+          ".write": "auth != null && root.child('lobbies').child($lobbyCode).child('leaderId').val() == auth.uid"
+        },
+        "currentTurn": {
+          ".write": "auth != null && root.child('lobbies').child($lobbyCode).child('leaderId').val() == auth.uid"
+        }
+      }
+    },
+    "presence": {
+      "$userId": {
+        ".read": "auth != null",
+        ".write": "auth != null && $userId == auth.uid"
+      }
+    },
+    "status": {
+      "$userId": {
+        ".read": "auth != null", 
+        ".write": "auth != null && $userId == auth.uid"
+      }
+    }
   }
 }
