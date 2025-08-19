@@ -1,69 +1,117 @@
-# React + TypeScript + Vite
+# Qwirkle Score Tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A React + TypeScript + Vite application for tracking scores in the Qwirkle board game. Uses Firebase for authentication, real‑time data sync (Realtime Database), and hosting. Built with Bun and Tailwind CSS v4.
 
-Currently, two official plugins are available:
+## Quick Start
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+1. Create a Firebase project and add a Web App. Copy the web app config.
+2. Create a Realtime Database (RTDB) instance in your project (not Firestore).
+3. Enable at least one Firebase Auth provider (e.g., Anonymous or Google).
+4. Configure environment variables. Create a `.env` file at the repo root:
 
-## Expanding the ESLint configuration
+   ```bash
+   VITE_FIREBASE_API_KEY=your_api_key
+   VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+   VITE_FIREBASE_DATABASE_URL=https://your_project.firebasedatabase.app
+   VITE_FIREBASE_PROJECT_ID=your_project_id
+   VITE_FIREBASE_APP_ID=your_app_id
+   # Optional if you enable these features
+   VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+   VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
+   ```
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+   You can also copy `.env.example` and fill in the values.
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+5. Install dependencies (Bun is the default package manager):
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+   ```bash
+   bun install
+   ```
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+6. Start the dev server (Vite defaults to http://localhost:5173):
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+   ```bash
+   bun run dev
+   ```
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Project Conventions
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- Package manager: Bun (use `bun install`, `bun run dev`, etc.).
+- Database: Firebase Realtime Database (RTDB). Rules live in `./database.rules.json`.
+- Auth: Firebase Authentication is required; enable at least one provider.
+- Module alias: Imports use `@/` to resolve from `src` (configured in `vite.config.ts`). There’s also `@ui` for `src/components/ui`.
+- Styling: Tailwind CSS v4 is integrated via `@tailwindcss/vite` – no extra setup needed beyond installing deps.
+- Tests: Vitest + React Testing Library. Firebase is mocked in `src/test/setup.ts` so tests do not hit real services.
+
+## Scripts
+
+- `bun run dev` – Start Vite dev server
+- `bun run build` – Type-check and build for production
+- `bun run preview` – Preview the production build
+- `bun run lint` – Run ESLint
+- `bun run test` – Run tests (Vitest)
+- `bun run test:ui` – Run tests with Vitest UI
+
+## Deploy
+
+This repo is preconfigured for Firebase Hosting.
+
+- Deploy database rules (recommended first):
+
+  ```bash
+  firebase deploy --only database
+  ```
+
+- Deploy hosting:
+
+  ```bash
+  # If you don’t have the CLI globally
+  bun add -g firebase-tools
+
+  firebase login
+  # Optionally set/confirm the project
+  firebase use --add
+
+  # Deploy the app
+  firebase deploy --only hosting
+  ```
+
+`firebase.json` and `.firebaserc` in the repo are used by the CLI.
+
+## Testing
+
+- Run all tests:
+
+  ```bash
+  bun run test
+  ```
+
+- Run with UI:
+
+  ```bash
+  bun run test:ui
+  ```
+
+Tests run in a jsdom environment. Firebase SDKs are mocked in `src/test/setup.ts`.
+
+## Troubleshooting
+
+- RTDB permission errors: Ensure you created a Realtime Database (not Firestore) and deployed `database.rules.json`:
+  ```bash
+  firebase deploy --only database
+  ```
+- Auth errors (e.g., login fails): Enable at least one Auth provider for your Firebase project.
+- Env not applied: With Vite, restart the dev server after changing `.env`. All runtime vars must be prefixed with `VITE_`.
+- Module resolution errors for `@/...`: Verify aliases in `vite.config.ts` and that imports use paths under `src/`.
+
+## Tech Notes
+
+- React + Vite (default dev port 5173)
+- TypeScript throughout
+- Tailwind CSS v4
+- Firebase v12 (App/Auth/Database)
+- Path aliases: `@` -> `src`, `@ui` -> `src/components/ui`
+
+## License
+
+MIT
