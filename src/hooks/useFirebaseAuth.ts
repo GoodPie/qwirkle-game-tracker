@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
-import { onAuthStateChanged, type User } from 'firebase/auth';
-import type { Unsubscribe } from 'firebase/database';
-import type { FirebaseError } from 'firebase/app';
+import {useEffect, useRef, useState} from 'react';
+import {onAuthStateChanged, type User} from 'firebase/auth';
+import type {Unsubscribe} from 'firebase/database';
+import type {FirebaseError} from 'firebase/app';
 
-import { auth, setupPresence, signInAnonymouslyWithRetry } from '../lib/firebase.ts';
+import {auth, setupPresence, signInAnonymouslyWithRetry} from '@/lib/firebase';
 
 interface AuthState {
   user: User | null;
@@ -46,15 +46,15 @@ export const useFirebaseAuth = () => {
       auth,
       async (user) => {
         if (user) {
-          setAuthState({ user, loading: false, error: null });
+          setAuthState({user, loading: false, error: null});
           attachPresence(user.uid);
           return;
         }
 
         try {
-          setAuthState((prev) => ({ ...prev, loading: true, error: null }));
+          setAuthState((prev) => ({...prev, loading: true, error: null}));
           const anonymousUser = await signInAnonymouslyWithRetry();
-          setAuthState({ user: anonymousUser, loading: false, error: null });
+          setAuthState({user: anonymousUser, loading: false, error: null});
           attachPresence(anonymousUser.uid);
         } catch (err: unknown) {
           console.error('Anonymous sign-in failed:', err);
@@ -87,9 +87,9 @@ export const useFirebaseAuth = () => {
 
   const retry = async () => {
     try {
-      setAuthState((prev) => ({ ...prev, loading: true, error: null }));
+      setAuthState((prev) => ({...prev, loading: true, error: null}));
       const user = await signInAnonymouslyWithRetry();
-      setAuthState({ user, loading: false, error: null });
+      setAuthState({user, loading: false, error: null});
       attachPresence(user.uid);
     } catch (err: unknown) {
       console.error('Retry authentication failed:', err);
