@@ -32,7 +32,7 @@ export function generateLobbyCode(attempts = 0): string {
     }
 
     // This should never happen with our character set, but safety check
-    return generateLobbyCode(attempts++); // Recursive retry until retry
+    return generateLobbyCode(attempts + 1); // Recursive retry until retry
   }
   
   return code;
